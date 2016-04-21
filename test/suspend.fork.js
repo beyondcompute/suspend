@@ -14,11 +14,31 @@ describe('suspend.fork()', function() {
 		}, done);
 	});
 
+	it('should support data supplied to fork()', function(done) {
+		run(function*() {
+			asyncDouble(12, fork({name: 'k'}));
+			assert.deepEqual([{data: {name: 'k'}, value: 24}], yield join());
+		}, done);
+	});
+
 	it('should order results based on calls to fork()', function(done) {
 		run(function*() {
 			slowAsyncDouble(3, fork());
 			asyncDouble(4, fork());
 			assert.deepEqual([6, 8], yield join());
+		}, done);
+	});
+
+	it('should only wrap results with supplied data into onjects', function(done) {
+		run(function*() {
+			slowAsyncDouble(5, fork({name: 'c'}));
+			asyncDouble(6, fork());
+			asyncDouble(7, fork({name: 'd'}));
+			assert.deepEqual([
+				{data: {name: 'c'}, value: 10},
+				12,
+				{data: {name: 'd'}, value: 14}
+			], yield join());
 		}, done);
 	});
 
