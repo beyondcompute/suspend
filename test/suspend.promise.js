@@ -137,6 +137,44 @@ describe('suspend.promise(fn*)()', function() {
 		// this should run before the promise fulfillment
 		x += 1;
 	});
+
+	it('should have asCallback method', function(done) {
+		var prom = suspend.promise(function*() {
+			return 3;
+		})();
+		assert.equal(typeof prom.asCallback, 'function');
+		done();
+	});
+
+	it('should pass the value to callback given to asCallback', function(done) {
+		var prom = suspend.promise(function*() {
+			return 3;
+		})();
+		prom.asCallback(function(err, result) {
+			assert.equal(result, 3);
+			done();
+		});
+	});
+
+	it('should not pass error to callback given to asCallback if there was no error', function(done) {
+		var prom = suspend.promise(function*() {
+			return 3;
+		})();
+		prom.asCallback(function(err, result) {
+			assert.equal(err, null);
+			done();
+		});
+	});
+
+	it('should pass error to callback given to asCallback', function(done) {
+		var prom = suspend.promise(function*() {
+			throw new Error('broken');
+		})();
+		prom.asCallback(function(err, result) {
+			assert(err instanceof Error);
+			done();
+		});
+	});
 });
 
 // functions used for test cases
